@@ -17,25 +17,49 @@ const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
-  const [siteSettings, setSiteSettings] = useState<SiteSettings>(getSettings());
-  const [courses, setCourses] = useState<Course[]>(getCourses());
+  
+  // Initialize with null or empty values until Firebase loads
+  const [siteSettings, setSiteSettings] = useState<SiteSettings | null>(null);
+  const [courses, setCourses] = useState<Course[]>([]);
+  
   const [activeLiveSession, setActiveLiveSession] = useState<LiveSession | null>(null);
   const [liveError, setLiveError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const initializePortal = async () => {
+      try {
+        // Fetch real-time data from Firebase collections
+        const [cloudSettings, cloudCourses] = await Promise.all([
+          getSettings(),
+          getCourses()
+        ]);
+        
+        if (cloudSettings) setSiteSettings(cloudSettings);
+        setCourses(cloudCourses);
+      } catch (error) {
+        console.error("Firebase load failed:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initializePortal();
+    
+    // Your existing security and local user logic remains here
+    const saved = localStorage.getItem('apiwada_user');
+    if (saved) setCurrentUser(JSON.parse(saved));
+  }, []);
+
+  // Simple loading screen while connecting to Firebase
+  if (loading || !siteSettings) {
+    return <div className="h-screen flex items-center justify-center font-bold">Loading ApiWada Physics...</div>;
+  }
+
+  // ... rest of your component logic;
 
   // Inside your App component
-useEffect(() => {
-  const loadCloudData = async () => {
-    const [settings, courseList] = await Promise.all([
-      getSettings(),
-      getCourses()
-    ]);
-    
-    if (settings) setSiteSettings(settings);
-    if (courseList.length > 0) setCourses(courseList);
-  };
 
-  loadCloudData();
-}, []);
 
   useEffect(() => {
     const handleContextMenu = (e: MouseEvent) => e.preventDefault();
