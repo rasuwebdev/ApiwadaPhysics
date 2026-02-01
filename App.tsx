@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import Navbar from './components/Navbar';
+import Navbar from './components/Navbar.tsx';
 import Footer from './components/Footer';
 import Hero from './components/Hero';
 import Dashboard from './components/Dashboard';
