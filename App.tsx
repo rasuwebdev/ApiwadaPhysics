@@ -13,50 +13,30 @@ import { getSettings, getCourses } from './services/dbService';
 import { ChevronRight, Play, Mail, Phone, Building2, Youtube, Radio, X, Lock, AlertCircle, Star, Crown, Award } from 'lucide-react';
 
 const App: React.FC = () => {
-  const [currentRoute, setCurrentRoute] = useState<AppRoute>(AppRoute.Home);
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [showLogin, setShowLogin] = useState(false);
-  const [showRegister, setShowRegister] = useState(false);
-  
-  // Initialize with null or empty values until Firebase loads
   const [siteSettings, setSiteSettings] = useState<SiteSettings | null>(null);
   const [courses, setCourses] = useState<Course[]>([]);
-  
-  const [activeLiveSession, setActiveLiveSession] = useState<LiveSession | null>(null);
-  const [liveError, setLiveError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const initializePortal = async () => {
+    const startApp = async () => {
       try {
-        // Fetch real-time data from Firebase collections
-        const [cloudSettings, cloudCourses] = await Promise.all([
+        // Fetches from your new Firebase dbService
+        const [settings, courseList] = await Promise.all([
           getSettings(),
           getCourses()
         ]);
-        
-        if (cloudSettings) setSiteSettings(cloudSettings);
-        setCourses(cloudCourses);
-      } catch (error) {
-        console.error("Firebase load failed:", error);
+        if (settings) setSiteSettings(settings);
+        setCourses(courseList);
       } finally {
         setLoading(false);
       }
     };
-
-    initializePortal();
-    
-    // Your existing security and local user logic remains here
-    const saved = localStorage.getItem('apiwada_user');
-    if (saved) setCurrentUser(JSON.parse(saved));
+    startApp();
   }, []);
 
-  // Simple loading screen while connecting to Firebase
   if (loading || !siteSettings) {
-    return <div className="h-screen flex items-center justify-center font-bold">Loading ApiWada Physics...</div>;
+    return <div className="h-screen flex items-center justify-center font-black">Loading ApiWada...</div>;
   }
-
-  // ... rest of your component logic;
 
   // Inside your App component
 
